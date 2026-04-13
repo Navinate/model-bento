@@ -72,6 +72,15 @@ Railway Project
 | `/auth/callback`               | OAuth callback handler                   |
 | `/auth/logout`                 | Clear session                            |
 
+### Admin-only (Railway admin)
+
+| Route                          | Description                              |
+|--------------------------------|------------------------------------------|
+| `/admin`                       | Admin dashboard — list all models, stats |
+| `/admin/m/:provider/:model`    | Manage a specific model page             |
+| `/admin/m/:provider/:model/delete` | Confirm + delete a model page        |
+| `/admin/m/:provider/:model/regenerate` | Re-extract + regenerate bento    |
+
 ---
 
 ## Database Schema
@@ -102,6 +111,8 @@ CREATE TABLE bento_pages (
     model_id      UUID UNIQUE REFERENCES models(id) ON DELETE CASCADE,
     layout        JSONB NOT NULL,           -- card positions, sizes, types
     extracted     JSONB NOT NULL,           -- full extracted model card data
+    source_text   TEXT NOT NULL,            -- original PDF-extracted text or pasted text (for regeneration)
+    source_type   TEXT NOT NULL DEFAULT 'text', -- 'pdf' or 'text'
     og_image_url  TEXT,
     published_at  TIMESTAMPTZ DEFAULT now()
 );
@@ -120,7 +131,8 @@ CREATE TABLE benchmarks (
 Key constraints:
 - `models.slug` is UNIQUE — one page per model, enforced at DB level
 - `bento_pages.model_id` is UNIQUE — one bento per model
-- No update/edit routes — pages are immutable after publish
+- No update/edit routes for regular users — pages are immutable after publish
+- Admins can delete or regenerate any page (see Admin section below)
 
 ---
 
@@ -264,9 +276,110 @@ Auto-generated image per model showing:
 
 - Published bento pages cached in Redis (HTML fragment)
 - Cache key: `bento:page:{slug}`
-- No invalidation needed (pages are immutable)
+- Pages are immutable for regular users — cache only invalidated by admin actions (delete/regenerate)
 - `/explore` page cached with 5-minute TTL
 - Cache warmed on publish
+
+---
+
+## Admin System
+
+### Admin Identity
+
+Admins are identified by GitHub user ID, configured via environment variable.
+No database role column — keeps it simple and controlled at the infrastructure level.
+
+```
+ADMIN_GITHUB_IDS=12345,67890    # Comma-separated GitHub user IDs
+```
+
+The Astro middleware checks `session.user.github_id` against this list.
+Admin routes return 404 (not 403) for non-admins to avoid leaking route existence.
+
+### Admin Capabilities
+
+| Action         | What it does                                                   |
+|----------------|----------------------------------------------------------------|
+| **Delete**     | Removes model + bento page + benchmarks (CASCADE). Invalidates Redis cache. Frees the slug so the model can be re-created by any user. |
+| **Regenerate** | Re-runs Claude extraction on the stored `source_text`, replaces `layout`, `extracted`, and `benchmarks` in-place. Invalidates cache + regenerates OG image. Model identity (slug, provider, name) stays the same. |
+
+### Delete Flow
+
+```
+Admin visits /admin/m/:provider/:model
+  │
+  ▼
+Clicks "Delete" → confirmation modal ("This is permanent")
+  │
+  ▼
+Astro server action:
+  1. DELETE FROM models WHERE slug = :slug  (CASCADE deletes bento_pages + benchmarks)
+  2. DELETE Redis key bento:page:{slug}
+  3. DELETE OG image from storage
+  4. Invalidate /explore cache
+  │
+  ▼
+Redirect to /admin with success toast
+```
+
+### Regenerate Flow
+
+```
+Admin visits /admin/m/:provider/:model
+  │
+  ▼
+Clicks "Regenerate" → confirmation ("Re-extract and rebuild bento?")
+  │
+  ▼
+Astro server action:
+  1. Fetch bento_pages.source_text for this model
+  2. Send source_text to python-api POST /api/extract
+  3. Claude re-extracts structured data from the original text
+  │
+  ▼
+Show preview of the new bento layout alongside the current one
+  │
+  ▼
+Admin clicks "Confirm Regenerate"
+  │
+  ▼
+Astro server action:
+  1. UPDATE bento_pages SET layout = :new_layout, extracted = :new_extracted
+  2. DELETE + re-INSERT benchmarks for this model
+  3. Trigger OG image regeneration (async)
+  4. DELETE Redis key bento:page:{slug}
+  5. Invalidate /explore cache
+  │
+  ▼
+Redirect to /m/:provider/:model (refreshed page)
+```
+
+### Why Store source_text?
+
+Regeneration requires the original model card content. Rather than storing
+uploaded PDFs as blobs (expensive, complex), we store the extracted raw text
+from the PDF parsing step. This is what gets sent to Claude anyway, so it's
+the right level of abstraction. The `source_type` field tracks whether the
+original input was a PDF or pasted text (for display purposes in admin UI).
+
+### Admin API Endpoints (Python — internal)
+
+The existing `POST /api/extract` endpoint is reused for regeneration.
+No new Python endpoints needed — the Astro server actions handle the
+DB writes and cache invalidation directly via Drizzle.
+
+### Admin UI
+
+The admin dashboard (`/admin`) shows:
+- Total models, total users, models created today
+- Searchable/filterable table of all models
+- Each row links to `/admin/m/:provider/:model`
+
+The model admin page (`/admin/m/:provider/:model`) shows:
+- Current bento page (embedded preview)
+- Model metadata (creator, created date, source type)
+- "Delete" button (red, with confirmation)
+- "Regenerate" button (with side-by-side preview before confirming)
 
 ---
 
@@ -286,6 +399,12 @@ model-bento/
 │   │   │   ├── m/[provider]/[model].astro  # Bento page (SSR)
 │   │   │   ├── generate.astro           # Upload form (auth-gated)
 │   │   │   ├── dashboard.astro          # User's created bentos
+│   │   │   ├── admin/
+│   │   │   │   ├── index.astro          # Admin dashboard
+│   │   │   │   └── m/[provider]/[model]/
+│   │   │   │       ├── index.astro      # Manage model page
+│   │   │   │       ├── delete.astro     # Delete confirmation
+│   │   │   │       └── regenerate.astro # Regenerate preview + confirm
 │   │   │   └── auth/
 │   │   │       ├── login.astro
 │   │   │       └── callback.astro
@@ -305,14 +424,21 @@ model-bento/
 │   │   │   ├── explore/
 │   │   │   │   ├── ModelGrid.tsx        # Browse grid
 │   │   │   │   └── SearchBar.tsx
+│   │   │   ├── admin/
+│   │   │   │   ├── AdminModelTable.tsx  # Searchable model list
+│   │   │   │   ├── DeleteConfirm.tsx    # Delete confirmation modal
+│   │   │   │   └── RegeneratePreview.tsx # Side-by-side old vs new
 │   │   │   └── shared/
 │   │   │       ├── Nav.astro
 │   │   │       ├── Footer.astro
 │   │   │       └── OGMeta.astro
+│   │   ├── middleware/
+│   │   │   └── admin.ts                 # Admin gate: check ADMIN_GITHUB_IDS, return 404 if not admin
 │   │   ├── lib/
 │   │   │   ├── db.ts                    # Drizzle ORM setup
 │   │   │   ├── schema.ts               # Drizzle schema definitions
 │   │   │   ├── auth.ts                  # Auth.js config
+│   │   │   ├── admin.ts                 # isAdmin() helper, reads ADMIN_GITHUB_IDS env var
 │   │   │   ├── api-client.ts            # Python API client
 │   │   │   └── layout-engine.ts         # Bento layout algorithm
 │   │   └── styles/
@@ -386,13 +512,19 @@ model-bento/
 21. JSON-LD structured data
 22. Sitemap generation
 
-### Phase 6: Polish
-23. Landing page
-24. Dashboard (your created bentos)
-25. Rate limiting on generation
-26. Error handling + loading states
-27. Dark/light mode toggle
-28. Mobile responsive pass
+### Phase 6: Admin
+23. Admin middleware (ADMIN_GITHUB_IDS env var check, 404 for non-admins)
+24. Admin dashboard page (model table with search/filter)
+25. Delete flow (confirmation → CASCADE delete → cache invalidation)
+26. Regenerate flow (re-extract → side-by-side preview → confirm → update)
+
+### Phase 7: Polish
+27. Landing page
+28. Dashboard (your created bentos)
+29. Rate limiting on generation
+30. Error handling + loading states
+31. Dark/light mode toggle
+32. Mobile responsive pass
 
 ---
 
@@ -408,6 +540,7 @@ AUTH_SECRET=            # Auth.js session secret
 PYTHON_API_URL=        # http://python-api.railway.internal:8000
 API_SHARED_SECRET=     # Internal service auth
 PUBLIC_SITE_URL=       # https://modelbento.com
+ADMIN_GITHUB_IDS=      # Comma-separated GitHub user IDs for admin access
 ```
 
 ### python-api
