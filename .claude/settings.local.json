@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun install:*)",
+      "Bash(bun run:*)",
+      "Bash(timeout 15 npx astro dev --host 0.0.0.0)"
+    ]
+  }
+}
