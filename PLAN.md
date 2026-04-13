@@ -80,6 +80,8 @@ Railway Project
 | `/admin/m/:provider/:model`    | Manage a specific model page             |
 | `/admin/m/:provider/:model/delete` | Confirm + delete a model page        |
 | `/admin/m/:provider/:model/regenerate` | Re-extract + regenerate bento    |
+| `/admin/users`                 | Browse all users, see ban status         |
+| `/admin/users/:id`             | View user detail + ban/unban             |
 
 ---
 
@@ -91,6 +93,8 @@ CREATE TABLE users (
     github_id     BIGINT UNIQUE NOT NULL,
     username      TEXT NOT NULL,
     avatar_url    TEXT,
+    banned_at     TIMESTAMPTZ,             -- null = not banned, set = banned
+    banned_reason TEXT,                    -- optional reason shown to user
     created_at    TIMESTAMPTZ DEFAULT now()
 );
 
@@ -216,6 +220,13 @@ Claude returns JSON matching a Pydantic model. Validation catches malformed outp
 User clicks "Generate" (must be logged in)
   │
   ▼
+Check users.banned_at for current session user
+  │
+  ├── BANNED → Show "Account suspended" page with reason, no upload form
+  │
+  └── NOT BANNED ↓
+  │
+  ▼
 Upload PDF or paste model card text
   │
   ▼
@@ -302,6 +313,8 @@ Admin routes return 404 (not 403) for non-admins to avoid leaking route existenc
 |----------------|----------------------------------------------------------------|
 | **Delete**     | Removes model + bento page + benchmarks (CASCADE). Invalidates Redis cache. Frees the slug so the model can be re-created by any user. |
 | **Regenerate** | Re-runs Claude extraction on the stored `source_text`, replaces `layout`, `extracted`, and `benchmarks` in-place. Invalidates cache + regenerates OG image. Model identity (slug, provider, name) stays the same. |
+| **Ban user**   | Sets `banned_at` + optional `banned_reason` on user record. Banned users cannot access `/generate`. Their existing published bento pages remain live. |
+| **Unban user** | Clears `banned_at` and `banned_reason`. User regains generation access immediately. |
 
 ### Delete Flow
 
@@ -354,6 +367,37 @@ Astro server action:
 Redirect to /m/:provider/:model (refreshed page)
 ```
 
+### Ban / Unban Flow
+
+```
+Admin visits /admin/users (searchable user table)
+  │
+  ▼
+Clicks a user row → /admin/users/:id
+  │
+  ▼
+Sees user info: username, avatar, join date, models created, ban status
+  │
+  ├── NOT BANNED → "Ban User" button
+  │     │
+  │     ▼
+  │   Enter optional reason → confirm
+  │     │
+  │     ▼
+  │   UPDATE users SET banned_at = now(), banned_reason = :reason WHERE id = :id
+  │
+  └── BANNED → Shows banned_at date + reason, "Unban User" button
+        │
+        ▼
+      Confirm → UPDATE users SET banned_at = NULL, banned_reason = NULL WHERE id = :id
+```
+
+Banned users experience:
+- `/generate` shows a "Your account has been suspended" page with the reason (if provided)
+- `/dashboard` still works (they can see their past creations)
+- Their published bento pages remain live and publicly viewable
+- They can still log in and browse — only generation is blocked
+
 ### Why Store source_text?
 
 Regeneration requires the original model card content. Rather than storing
@@ -371,7 +415,10 @@ DB writes and cache invalidation directly via Drizzle.
 ### Admin UI
 
 The admin dashboard (`/admin`) shows:
-- Total models, total users, models created today
+- Total models, total users, banned users count, models created today
+- Quick links to model management and user management
+
+The model list (`/admin` main table) shows:
 - Searchable/filterable table of all models
 - Each row links to `/admin/m/:provider/:model`
 
@@ -380,6 +427,18 @@ The model admin page (`/admin/m/:provider/:model`) shows:
 - Model metadata (creator, created date, source type)
 - "Delete" button (red, with confirmation)
 - "Regenerate" button (with side-by-side preview before confirming)
+
+The user list (`/admin/users`) shows:
+- Searchable table of all users
+- Columns: avatar, username, GitHub ID, models created, ban status, join date
+- Banned users highlighted with a visual indicator
+- Each row links to `/admin/users/:id`
+
+The user detail page (`/admin/users/:id`) shows:
+- User profile (avatar, username, GitHub link)
+- List of bento pages they've created (links to each)
+- Ban status: if banned, shows date + reason
+- "Ban User" button (with reason input) or "Unban User" button
 
 ---
 
@@ -401,6 +460,9 @@ model-bento/
 │   │   │   ├── dashboard.astro          # User's created bentos
 │   │   │   ├── admin/
 │   │   │   │   ├── index.astro          # Admin dashboard
+│   │   │   │   ├── users/
+│   │   │   │   │   ├── index.astro      # User list with ban status
+│   │   │   │   │   └── [id].astro       # User detail + ban/unban
 │   │   │   │   └── m/[provider]/[model]/
 │   │   │   │       ├── index.astro      # Manage model page
 │   │   │   │       ├── delete.astro     # Delete confirmation
@@ -426,6 +488,8 @@ model-bento/
 │   │   │   │   └── SearchBar.tsx
 │   │   │   ├── admin/
 │   │   │   │   ├── AdminModelTable.tsx  # Searchable model list
+│   │   │   │   ├── AdminUserTable.tsx   # Searchable user list with ban status
+│   │   │   │   ├── BanUserForm.tsx      # Ban reason input + confirm
 │   │   │   │   ├── DeleteConfirm.tsx    # Delete confirmation modal
 │   │   │   │   └── RegeneratePreview.tsx # Side-by-side old vs new
 │   │   │   └── shared/
@@ -514,17 +578,19 @@ model-bento/
 
 ### Phase 6: Admin
 23. Admin middleware (ADMIN_GITHUB_IDS env var check, 404 for non-admins)
-24. Admin dashboard page (model table with search/filter)
-25. Delete flow (confirmation → CASCADE delete → cache invalidation)
-26. Regenerate flow (re-extract → side-by-side preview → confirm → update)
+24. Admin dashboard page (stats + quick links)
+25. Model management: list, delete flow, regenerate flow
+26. User management: list, user detail page
+27. Ban/unban flow (set banned_at + reason, clear on unban)
+28. Ban check on `/generate` route (show suspended page if banned)
 
 ### Phase 7: Polish
-27. Landing page
-28. Dashboard (your created bentos)
-29. Rate limiting on generation
-30. Error handling + loading states
-31. Dark/light mode toggle
-32. Mobile responsive pass
+29. Landing page
+30. Dashboard (your created bentos)
+31. Rate limiting on generation
+32. Error handling + loading states
+33. Dark/light mode toggle
+34. Mobile responsive pass
 
 ---
 
