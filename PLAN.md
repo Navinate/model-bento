@@ -522,10 +522,10 @@ model-bento/
 - [x] **2.1** — PDF parser ✅
 - [x] **2.2** — Claude extraction service ✅
 - [x] **2.3** — Model existence check ✅
-- [ ] **2.4** — Generation server action (wiring)
+- [x] **2.4** — Generation server action (wiring) ✅
 - [ ] **Phase 3+** — not started
 
-**Current test count: 22 passing**
+**Current test count: 26 passing**
 
 ### Testing Infrastructure
 
