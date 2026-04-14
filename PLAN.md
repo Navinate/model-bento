@@ -536,10 +536,14 @@ model-bento/
 - [x] **5.3** — JSON-LD structured data ✅
 - [x] **5.4** — Sitemap ✅
 - [x] **6.1** — Admin middleware ✅
-- [ ] **6.2** — Admin dashboard + model list
-- [ ] **Phase 6.3+** — not started
+- [x] **6.2** — Admin dashboard + model list ✅
+- [x] **6.3** — Model delete flow ✅
+- [x] **6.4** — Model regenerate flow ✅
+- [x] **6.5** — User list + detail page ✅
+- [x] **6.6** — Ban/unban flow ✅
+- [ ] **Phase 7: Polish** — not started
 
-**Current test count: 75 passing** (54 Vitest + 21 Playwright)
+**Current test count: 82 passing** (61 Vitest + 21 Playwright)
 
 ### Testing Infrastructure
 

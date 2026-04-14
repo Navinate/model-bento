@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/global.css';
+import { db } from '../../../lib/db';
+import { users, models, bentoPages } from '../../../lib/schema';
+import { eq } from 'drizzle-orm';
+import { banUser, unbanUser } from '../../../lib/services/admin';
+
+const { id } = Astro.params;
+if (!id) return new Response(null, { status: 404 });
+
+// Handle POST actions
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('action');
+
+  if (action === 'ban') {
+    const reason = form.get('reason') as string || null;
+    await banUser(id, reason);
+  } else if (action === 'unban') {
+    await unbanUser(id);
+  }
+
+  return Astro.redirect(`/admin/users/${id}`);
+}
+
+const [user] = await db.select().from(users).where(eq(users.id, id));
+if (!user) return new Response(null, { status: 404 });
+
+const userModels = await db
+  .select({
+    provider: models.provider,
+    name: models.name,
+    displayName: models.displayName,
+  })
+  .from(models)
+  .where(eq(models.createdBy, id));
+---
+
+<BaseLayout title={`Admin: ${user.username} — Model Bento`}>
+  <main class="mx-auto max-w-3xl p-8">
+    <a href="/admin/users" class="text-sm text-slate-500 hover:text-slate-900">← Back to Users</a>
+
+    <div class="mt-4 flex items-center gap-4 mb-8">
+      {user.avatarUrl && <img src={user.avatarUrl} alt="" class="w-16 h-16 rounded-full" />}
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">{user.username}</h1>
+        <p class="text-sm text-slate-500">GitHub ID: {user.githubId}</p>
+      </div>
+    </div>
+
+    <div class="mb-8 rounded-xl border border-slate-200 p-6">
+      <h2 class="text-lg font-semibold text-slate-900 mb-2">Ban Status</h2>
+      {user.bannedAt ? (
+        <div>
+          <p class="text-sm text-red-600 mb-1">Banned on {new Date(user.bannedAt).toLocaleDateString()}</p>
+          {user.bannedReason && <p class="text-sm text-slate-600 mb-4">Reason: {user.bannedReason}</p>}
+          <form method="POST">
+            <input type="hidden" name="action" value="unban" />
+            <button type="submit" class="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-100">
+              Unban User
+            </button>
+          </form>
+        </div>
+      ) : (
+        <form method="POST" class="flex gap-2 items-end">
+          <input type="hidden" name="action" value="ban" />
+          <div class="flex-1">
+            <label class="block text-sm text-slate-500 mb-1">Reason (optional)</label>
+            <input type="text" name="reason" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+          </div>
+          <button type="submit" class="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100">
+            Ban User
+          </button>
+        </form>
+      )}
+    </div>
+
+    <h2 class="text-lg font-semibold text-slate-900 mb-4">Models Created ({userModels.length})</h2>
+    {userModels.length > 0 ? (
+      <div class="space-y-2">
+        {userModels.map((m) => (
+          <a href={`/m/${m.provider}/${m.name}`} class="block rounded-lg border border-slate-200 p-4 hover:bg-slate-50">
+            <p class="text-sm font-medium">{m.displayName}</p>
+            <p class="text-xs text-slate-500">{m.provider}/{m.name}</p>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="text-sm text-slate-500">No models created yet.</p>
+    )}
+  </main>
+</BaseLayout>

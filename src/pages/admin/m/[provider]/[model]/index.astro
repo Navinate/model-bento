@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import '../../../../../styles/global.css';
+import { getBentoData } from '../../../../../lib/services/bento-cache';
+
+const { provider, model } = Astro.params;
+
+if (!provider || !model) {
+  return new Response(null, { status: 404 });
+}
+
+const data = await getBentoData(provider, model);
+if (!data) {
+  return new Response(null, { status: 404 });
+}
+---
+
+<BaseLayout title={`Admin: ${data.displayName} — Model Bento`}>
+  <main class="mx-auto max-w-3xl p-8">
+    <a href="/admin" class="text-sm text-slate-500 hover:text-slate-900">← Back to Admin</a>
+    <h1 class="text-3xl font-bold text-slate-900 mt-4 mb-2">{data.displayName}</h1>
+    <p class="text-sm text-slate-500 mb-8">{data.provider}/{Astro.params.model}</p>
+
+    <div class="flex gap-4">
+      <a
+        href={`/m/${provider}/${model}`}
+        class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+      >
+        View Page
+      </a>
+      <form method="POST" action={`/admin/m/${provider}/${model}/delete`}>
+        <button
+          type="submit"
+          class="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+          onclick="return confirm('Are you sure you want to delete this model? This is permanent.')"
+        >
+          Delete
+        </button>
+      </form>
+      <form method="POST" action={`/admin/m/${provider}/${model}/regenerate`}>
+        <button
+          type="submit"
+          class="rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100"
+        >
+          Regenerate
+        </button>
+      </form>
+    </div>
+  </main>
+</BaseLayout>
