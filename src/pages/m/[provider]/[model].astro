@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import '../../../styles/global.css';
+import { BentoGrid } from '../../../components/bento/BentoGrid';
+import { db } from '../../../lib/db';
+import { models, bentoPages } from '../../../lib/schema';
+import { eq, and } from 'drizzle-orm';
+import type { LayoutCard } from '../../../lib/layout-engine';
+
+const { provider, model } = Astro.params;
+
+if (!provider || !model) {
+  return new Response(null, { status: 404 });
+}
+
+// Look up model by provider + name
+const [result] = await db
+  .select({
+    displayName: models.displayName,
+    provider: models.provider,
+    layout: bentoPages.layout,
+    extracted: bentoPages.extracted,
+  })
+  .from(models)
+  .innerJoin(bentoPages, eq(bentoPages.modelId, models.id))
+  .where(and(eq(models.provider, provider), eq(models.name, model)))
+  .limit(1);
+
+if (!result) {
+  return new Response(null, { status: 404 });
+}
+
+const layout = result.layout as LayoutCard[];
+
+// Immutable content — cache aggressively
+Astro.response.headers.set('Cache-Control', 'public, max-age=86400, immutable');
+---
+
+<BaseLayout title={`${result.displayName} — Model Bento`}>
+  <main class="mx-auto max-w-7xl p-8">
+    <BentoGrid layout={layout} client:load />
+  </main>
+</BaseLayout>
