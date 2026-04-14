@@ -27,11 +27,13 @@ function mockClient(response: object) {
 let queryClient: ReturnType<typeof postgres>;
 let db: ReturnType<typeof drizzle>;
 
-beforeAll(() => {
+beforeAll(async () => {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_URL not set');
   queryClient = postgres(databaseUrl);
   db = drizzle(queryClient, { schema });
+  // Clean up any leftover data from other test suites
+  await db.execute(sql`DELETE FROM models WHERE provider = 'anthropic' AND name = 'claude-sonnet-4'`);
 });
 
 afterAll(async () => {

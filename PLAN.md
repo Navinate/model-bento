@@ -541,9 +541,14 @@ model-bento/
 - [x] **6.4** — Model regenerate flow ✅
 - [x] **6.5** — User list + detail page ✅
 - [x] **6.6** — Ban/unban flow ✅
-- [ ] **Phase 7: Polish** — not started
+- [x] **7.1** — Landing page ✅
+- [x] **7.2** — User dashboard ✅
+- [x] **7.3** — Embed view ✅
+- [x] **7.4** — Rate limiting ✅
+- [x] **7.5** — Error handling (404 page, banned state) ✅
+- [x] **7.6** — Generate page ✅
 
-**Current test count: 82 passing** (61 Vitest + 21 Playwright)
+**All phases complete. Current test count: 92 passing** (65 Vitest + 27 Playwright)
 
 ### Testing Infrastructure
 

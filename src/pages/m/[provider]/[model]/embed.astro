@@ -1,0 +1,41 @@
+---
+import '../../../../styles/global.css';
+import { BentoGrid } from '../../../../components/bento/BentoGrid';
+import { getBentoData } from '../../../../lib/services/bento-cache';
+
+const { provider, model } = Astro.params;
+
+if (!provider || !model) {
+  return new Response(null, { status: 404 });
+}
+
+const data = await getBentoData(provider, model);
+
+if (!data) {
+  return new Response(null, { status: 404 });
+}
+
+// Compact layout: only hero + top stats
+const compactLayout = data.layout.slice(0, 5);
+
+// Allow framing
+Astro.response.headers.set('X-Frame-Options', 'ALLOWALL');
+Astro.response.headers.delete('X-Frame-Options');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{data.displayName} — Model Bento Embed</title>
+  </head>
+  <body class="bg-white p-4">
+    <BentoGrid layout={compactLayout} client:load />
+    <p class="mt-4 text-center text-xs text-slate-400">
+      <a href={`/m/${provider}/${model}`} target="_blank" rel="noopener" class="hover:text-slate-600">
+        View on Model Bento
+      </a>
+    </p>
+  </body>
+</html>

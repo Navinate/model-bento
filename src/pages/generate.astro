@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+import { getSession, requireAuth } from '../lib/auth';
+import { db } from '../lib/db';
+import { users } from '../lib/schema';
+import { eq } from 'drizzle-orm';
+
+const session = await (Astro.locals as any).auth?.();
+const auth = requireAuth(getSession(session), '/generate');
+
+if (auth.redirect) {
+  return Astro.redirect(auth.redirect);
+}
+
+// Check ban status
+const [user] = await db.select().from(users).where(eq(users.id, auth.session!.user.id));
+
+const isBanned = user?.bannedAt != null;
+---
+
+<BaseLayout title="Generate — Model Bento">
+  <main class="mx-auto max-w-3xl p-8">
+    {isBanned ? (
+      <div class="text-center py-16" data-suspended>
+        <h1 class="text-3xl font-bold text-slate-900">Account Suspended</h1>
+        <p class="mt-4 text-slate-500">
+          Your account has been suspended and you cannot generate new bento pages.
+        </p>
+        {user.bannedReason && (
+          <p class="mt-2 text-sm text-slate-400">Reason: {user.bannedReason}</p>
+        )}
+      </div>
+    ) : (
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-8">Generate Bento Page</h1>
+        <p class="text-slate-500 mb-6">Upload a model card PDF or paste the text to generate a bento page.</p>
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Upload PDF</label>
+            <input
+              type="file"
+              name="pdf"
+              accept=".pdf"
+              class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+            />
+          </div>
+          <div class="text-center text-sm text-slate-400">— or —</div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Paste model card text</label>
+            <textarea
+              name="text"
+              rows={10}
+              class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm resize-y"
+              placeholder="Paste the full model card text here..."
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Generate Bento
+          </button>
+        </form>
+      </div>
+    )}
+  </main>
+</BaseLayout>

@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+import { getSession, requireAuth } from '../lib/auth';
+import { db } from '../lib/db';
+import { models, bentoPages } from '../lib/schema';
+import { eq } from 'drizzle-orm';
+
+const session = await (Astro.locals as any).auth?.();
+const auth = requireAuth(getSession(session), '/dashboard');
+
+if (auth.redirect) {
+  return Astro.redirect(auth.redirect);
+}
+
+const userModels = await db
+  .select({
+    provider: models.provider,
+    name: models.name,
+    displayName: models.displayName,
+  })
+  .from(models)
+  .innerJoin(bentoPages, eq(bentoPages.modelId, models.id))
+  .where(eq(models.createdBy, auth.session!.user.id));
+---
+
+<BaseLayout title="Dashboard — Model Bento">
+  <main class="mx-auto max-w-5xl p-8">
+    <h1 class="text-3xl font-bold text-slate-900 mb-8">Your Bento Pages</h1>
+
+    {userModels.length > 0 ? (
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {userModels.map((m) => (
+          <a
+            href={`/m/${m.provider}/${m.name}`}
+            class="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+              {m.provider}
+            </p>
+            <p class="mt-1 text-lg font-semibold text-slate-900">{m.displayName}</p>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16" data-empty-state>
+        <p class="text-lg text-slate-500">You haven't created any bento pages yet.</p>
+        <a href="/generate" class="mt-4 inline-block rounded-xl bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800">
+          Create your first bento
+        </a>
+      </div>
+    )}
+  </main>
+</BaseLayout>

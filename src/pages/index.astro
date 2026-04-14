@@ -1,13 +1,70 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/global.css';
+import { db } from '../lib/db';
+import { models, bentoPages } from '../lib/schema';
+import { eq, desc } from 'drizzle-orm';
+
+const featured = await db
+  .select({
+    provider: models.provider,
+    name: models.name,
+    displayName: models.displayName,
+  })
+  .from(models)
+  .innerJoin(bentoPages, eq(bentoPages.modelId, models.id))
+  .orderBy(desc(bentoPages.publishedAt))
+  .limit(6);
 ---
 
-<BaseLayout title="Model Bento">
-  <main class="flex min-h-screen items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-5xl font-bold tracking-tight">Model Bento</h1>
-      <p class="mt-4 text-lg text-neutral-500">AI model cards, beautifully presented.</p>
-    </div>
+<BaseLayout title="Model Bento — AI Model Cards, Beautifully Presented">
+  <main>
+    <section class="flex min-h-[60vh] flex-col items-center justify-center px-8 text-center">
+      <h1 class="text-6xl font-bold tracking-tight text-slate-900">Model Bento</h1>
+      <p class="mt-4 text-xl text-slate-500 max-w-xl">
+        AI model cards as beautiful Apple-style bento presentations. Upload a model card, get a shareable page.
+      </p>
+      <form action="/explore" method="GET" class="mt-8 flex w-full max-w-md gap-2">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search models..."
+          data-hero-search
+          class="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-base outline-none focus:border-slate-400"
+        />
+        <button
+          type="submit"
+          class="rounded-xl bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800"
+        >
+          Search
+        </button>
+      </form>
+      <a
+        href="/generate"
+        class="mt-4 text-sm font-medium text-slate-500 hover:text-slate-900"
+        data-cta
+      >
+        Or create a bento page →
+      </a>
+    </section>
+
+    {featured.length > 0 && (
+      <section class="mx-auto max-w-5xl px-8 pb-16" data-featured>
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Featured Models</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((m) => (
+            <a
+              href={`/m/${m.provider}/${m.name}`}
+              class="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md"
+            >
+              <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+                {m.provider}
+              </p>
+              <p class="mt-1 text-lg font-semibold text-slate-900">{m.displayName}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
   </main>
 </BaseLayout>
