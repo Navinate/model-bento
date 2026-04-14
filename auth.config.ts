@@ -2,6 +2,7 @@ import GitHub from '@auth/core/providers/github';
 import { defineConfig } from 'auth-astro';
 
 export default defineConfig({
+  trustHost: true,
   providers: [
     GitHub({
       clientId: import.meta.env.GITHUB_CLIENT_ID,
