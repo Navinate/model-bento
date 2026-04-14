@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitest/config';
+import { loadEnv } from 'vite';
 
 export default defineConfig({
   test: {
-    envFile: '.env.test',
+    env: loadEnv('test', process.cwd(), ''),
   },
 });

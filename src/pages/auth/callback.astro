@@ -1,0 +1,6 @@
+---
+// Auth.js handles the actual callback at /api/auth/callback/github.
+// This page exists as a fallback redirect target after successful auth.
+const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+return Astro.redirect(callbackUrl);
+---

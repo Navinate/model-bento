@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSession } from 'auth-astro/server';
+
+const session = await getSession(Astro.request);
+if (session) {
+  const callbackUrl = Astro.url.searchParams.get('callbackUrl') || '/';
+  return Astro.redirect(callbackUrl);
+}
+---
+
+<BaseLayout title="Sign In — Model Bento">
+  <main class="flex min-h-screen items-center justify-center">
+    <div class="w-full max-w-sm rounded-3xl bg-neutral-50 p-8 text-center">
+      <h1 class="text-2xl font-bold tracking-tight">Sign in to Model Bento</h1>
+      <p class="mt-2 text-sm text-neutral-500">Sign in with your GitHub account to create bento pages.</p>
+      <a
+        href="/api/auth/signin/github"
+        class="mt-6 inline-flex items-center gap-2 rounded-2xl bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+      >
+        Sign in with GitHub
+      </a>
+    </div>
+  </main>
+</BaseLayout>

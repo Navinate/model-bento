@@ -3,7 +3,16 @@
     "allow": [
       "Bash(bun install:*)",
       "Bash(bun run:*)",
-      "Bash(timeout 15 npx astro dev --host 0.0.0.0)"
+      "Bash(timeout 15 npx astro dev --host 0.0.0.0)",
+      "Bash(bun add:*)",
+      "Bash(docker compose:*)",
+      "Bash(PGPASSWORD=modelbento psql -h localhost -U modelbento -d modelbento_test -c \"SELECT 1\")",
+      "Bash(PGPASSWORD=modelbento pg_isready -h localhost -p 5432)",
+      "Bash(DATABASE_URL=\"postgresql://modelbento:modelbento@localhost:5432/modelbento_test\" bunx drizzle-kit generate)",
+      "Bash(DATABASE_URL=\"postgresql://modelbento:modelbento@localhost:5432/modelbento_test\" bunx drizzle-kit migrate)",
+      "Bash(DATABASE_URL=\"postgresql://modelbento:modelbento@localhost:5432/modelbento_test\" bun run test -- tests/db/schema.test.ts)",
+      "Bash(npx vitest:*)",
+      "Bash(node -e \"const v = require\\('./node_modules/vitest/package.json'\\); console.log\\(Object.keys\\(v.exports || {}\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }
