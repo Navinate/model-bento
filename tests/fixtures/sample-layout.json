@@ -1,0 +1,131 @@
+[
+  {
+    "type": "hero",
+    "gridColumn": "1 / span 2",
+    "gridRow": "1 / span 2",
+    "data": {
+      "displayName": "Claude Sonnet 4",
+      "provider": "anthropic",
+      "description": "A large language model developed by Anthropic featuring 175 billion parameters and a 200,000 token context window."
+    }
+  },
+  {
+    "type": "stat",
+    "gridColumn": "3 / span 1",
+    "gridRow": "1 / span 1",
+    "data": {
+      "label": "Parameters",
+      "value": "175B"
+    }
+  },
+  {
+    "type": "stat",
+    "gridColumn": "4 / span 1",
+    "gridRow": "1 / span 1",
+    "data": {
+      "label": "Context Window",
+      "value": 200000
+    }
+  },
+  {
+    "type": "benchmark",
+    "gridColumn": "5 / span 2",
+    "gridRow": "1 / span 1",
+    "data": {
+      "name": "GSM8K",
+      "score": 96.4,
+      "unit": "%"
+    }
+  },
+  {
+    "type": "benchmark",
+    "gridColumn": "7 / span 2",
+    "gridRow": "1 / span 1",
+    "data": {
+      "name": "HellaSwag",
+      "score": 95.2,
+      "unit": "%"
+    }
+  },
+  {
+    "type": "benchmark",
+    "gridColumn": "9 / span 2",
+    "gridRow": "1 / span 1",
+    "data": {
+      "name": "MMLU",
+      "score": 92.3,
+      "unit": "%"
+    }
+  },
+  {
+    "type": "benchmark",
+    "gridColumn": "11 / span 2",
+    "gridRow": "1 / span 1",
+    "data": {
+      "name": "HumanEval",
+      "score": 89.1,
+      "unit": "%"
+    }
+  },
+  {
+    "type": "capabilities",
+    "gridColumn": "3 / span 2",
+    "gridRow": "2 / span 1",
+    "data": {
+      "capabilities": [
+        "Advanced code generation and debugging",
+        "Long-document analysis and summarization",
+        "Creative writing and ideation",
+        "Multi-step reasoning",
+        "Instruction following"
+      ]
+    }
+  },
+  {
+    "type": "limitations",
+    "gridColumn": "5 / span 2",
+    "gridRow": "2 / span 1",
+    "data": {
+      "limitations": [
+        "May hallucinate facts in knowledge-intensive domains",
+        "Limited real-time knowledge",
+        "Cannot execute code or access the internet"
+      ]
+    }
+  },
+  {
+    "type": "highlight",
+    "gridColumn": "7 / span 1",
+    "gridRow": "2 / span 1",
+    "data": {
+      "label": "Parameters",
+      "value": "175B"
+    }
+  },
+  {
+    "type": "highlight",
+    "gridColumn": "8 / span 1",
+    "gridRow": "2 / span 1",
+    "data": {
+      "label": "Context Window",
+      "value": "200K tokens"
+    }
+  },
+  {
+    "type": "highlight",
+    "gridColumn": "9 / span 1",
+    "gridRow": "2 / span 1",
+    "data": {
+      "label": "GSM8K",
+      "value": "96.4%"
+    }
+  },
+  {
+    "type": "training",
+    "gridColumn": "10 / span 2",
+    "gridRow": "2 / span 1",
+    "data": {
+      "trainingDataCutoff": "April 2025"
+    }
+  }
+]

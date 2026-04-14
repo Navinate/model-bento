@@ -523,9 +523,11 @@ model-bento/
 - [x] **2.2** — Claude extraction service ✅
 - [x] **2.3** — Model existence check ✅
 - [x] **2.4** — Generation server action (wiring) ✅
-- [ ] **Phase 3+** — not started
+- [x] **3.1** — Layout engine ✅
+- [ ] **3.2** — Bento card components
+- [ ] **Phase 3.3+** — not started
 
-**Current test count: 26 passing**
+**Current test count: 32 passing**
 
 ### Testing Infrastructure
 
