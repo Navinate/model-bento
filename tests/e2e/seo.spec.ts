@@ -79,4 +79,29 @@ test.describe('SEO meta tags', () => {
     const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
     expect(canonical).toContain('/m/anthropic/claude-sonnet-4');
   });
+
+  test('bento page has valid JSON-LD script tag', async ({ page }) => {
+    await page.goto('/m/anthropic/claude-sonnet-4');
+    const jsonLdText = await page.locator('script[type="application/ld+json"]').textContent();
+    expect(jsonLdText).toBeTruthy();
+    const jsonLd = JSON.parse(jsonLdText!);
+    expect(jsonLd['@type']).toBe('SoftwareApplication');
+  });
+
+  test('JSON-LD contains model name and provider', async ({ page }) => {
+    await page.goto('/m/anthropic/claude-sonnet-4');
+    const jsonLdText = await page.locator('script[type="application/ld+json"]').textContent();
+    const jsonLd = JSON.parse(jsonLdText!);
+    expect(jsonLd.name).toBe('Claude Sonnet 4');
+    expect(jsonLd.author.name).toBe('anthropic');
+  });
+});
+
+test.describe('sitemap', () => {
+  test('sitemap contains published model URLs', async ({ page }) => {
+    const response = await page.goto('/sitemap.xml');
+    const text = await response!.text();
+    expect(text).toContain('<?xml');
+    expect(text).toContain('/m/anthropic/claude-sonnet-4');
+  });
 });

@@ -532,10 +532,12 @@ model-bento/
 - [x] **4.3** — Redis data caching ✅
 - [x] **4.4** — Explore page ✅
 - [x] **5.1** — OG meta tags ✅
-- [ ] **5.2** — OG image generation
-- [ ] **Phase 5.3+** — not started
+- [x] **5.2** — OG image generation ✅
+- [x] **5.3** — JSON-LD structured data ✅
+- [x] **5.4** — Sitemap ✅
+- [ ] **Phase 6: Admin** — not started
 
-**Current test count: 64 passing** (46 Vitest + 18 Playwright)
+**Current test count: 70 passing** (49 Vitest + 21 Playwright)
 
 ### Testing Infrastructure
 

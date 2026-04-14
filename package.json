@@ -20,6 +20,7 @@
     "@astrojs/react": "^4.2.1",
     "@auth/core": "^0.34.3",
     "@tailwindcss/vite": "^4.1.4",
+    "@vercel/og": "^0.11.1",
     "astro": "^5.7.10",
     "auth-astro": "^4.2.0",
     "drizzle-orm": "^0.45.2",

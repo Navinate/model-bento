@@ -21,6 +21,15 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? 'https://modelbento.com';
 const canonicalUrl = `${siteUrl}/m/${provider}/${model}`;
 const description = data.extracted.description ?? `${data.displayName} model card — benchmarks, capabilities, and highlights.`;
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: data.displayName,
+  author: { '@type': 'Organization', name: data.provider },
+  url: canonicalUrl,
+  description,
+};
+
 // Immutable content — cache aggressively
 Astro.response.headers.set('Cache-Control', 'public, max-age=86400, immutable');
 ---
@@ -32,6 +41,7 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=86400, immutable');
     description={description}
     canonicalUrl={canonicalUrl}
   />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <main class="mx-auto max-w-7xl p-8">
     <BentoGrid layout={data.layout} client:load />
   </main>
