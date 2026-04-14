@@ -86,6 +86,17 @@ Server-side modules in `src/lib/services/`:
 - `llm-extractor.ts` — Claude API structured extraction with Zod validation + retry
 - `og-generator.ts` — @vercel/og async image generation
 
+## Railway CLI
+
+The Railway CLI (`railway` v4.36.1+) is available in this environment for managing the Railway deployment, checking logs, and accessing service variables.
+
+```bash
+railway status                  # Current project/environment info
+railway logs                    # View service logs
+railway variables               # List environment variables
+railway up                      # Deploy current directory
+```
+
 ## Environment Variables
 
 Single set of env vars (see PLAN.md for full list): `DATABASE_URL`, `REDIS_URL`, `ANTHROPIC_API_KEY`, GitHub OAuth creds (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`), `AUTH_SECRET`, `PUBLIC_SITE_URL`, `ADMIN_GITHUB_IDS`.

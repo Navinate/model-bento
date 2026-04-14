@@ -516,6 +516,17 @@ model-bento/
 
 ## Implementation Order
 
+### Progress
+
+- [x] **Phase 1: Foundation** — all steps complete (1.1–1.4), 15 tests passing
+- [x] **2.1** — PDF parser ✅
+- [x] **2.2** — Claude extraction service ✅
+- [x] **2.3** — Model existence check ✅
+- [ ] **2.4** — Generation server action (wiring)
+- [ ] **Phase 3+** — not started
+
+**Current test count: 22 passing**
+
 ### Testing Infrastructure
 
 Set up before Phase 1. All subsequent steps follow red → green → refactor.
