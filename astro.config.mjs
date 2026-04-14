@@ -8,6 +8,13 @@ export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
   integrations: [react(), auth()],
+  security: {
+    // Trust x-forwarded-* headers from Railway's edge proxy so Astro
+    // constructs request URLs with the real public host, not localhost.
+    allowedDomains: [
+      { hostname: 'model-bento-production.up.railway.app', protocol: 'https' },
+    ],
+  },
   vite: {
     plugins: [tailwindcss()],
   },
