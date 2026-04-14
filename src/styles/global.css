@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* Bento grid tokens */
+:root {
+  --bento-radius: 1.5rem;
+  --bento-gap: 1.5rem;
+}
+
+/* Bento grid responsive: 12 columns on desktop, single column on mobile */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--bento-gap);
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-grid > * {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+  }
+}

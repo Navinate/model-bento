@@ -525,10 +525,11 @@ model-bento/
 - [x] **2.4** — Generation server action (wiring) ✅
 - [x] **3.1** — Layout engine ✅
 - [x] **3.2** — Bento card components ✅
-- [ ] **3.3** — Theming + responsive grid
-- [ ] **Phase 3.4+** — not started
+- [x] **3.3** — Theming + responsive grid ✅
+- [ ] **3.4** — Animations
+- [ ] **Phase 4+** — not started
 
-**Current test count: 39 passing**
+**Current test count: 43 passing** (39 Vitest + 4 Playwright)
 
 ### Testing Infrastructure
 

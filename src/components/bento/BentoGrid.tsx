@@ -26,10 +26,7 @@ const cardComponents: Record<LayoutCard['type'], React.ComponentType<{ data: any
 export function BentoGrid({ layout }: BentoGridProps) {
   return (
     <div
-      className="grid gap-6"
-      style={{
-        gridTemplateColumns: 'repeat(12, 1fr)',
-      }}
+      className="bento-grid"
     >
       {layout.map((card, i) => {
         const Component = cardComponents[card.type];

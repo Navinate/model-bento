@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/global.css';
+import { BentoGrid } from '../../components/bento/BentoGrid';
+import { generateLayout } from '../../lib/layout-engine';
+
+// Sample extracted data for testing
+const sampleExtracted = {
+  provider: 'anthropic',
+  name: 'claude-sonnet-4',
+  display_name: 'Claude Sonnet 4',
+  description: 'A large language model developed by Anthropic.',
+  parameter_count: '175B',
+  context_window: 200000,
+  benchmarks: [
+    { name: 'MMLU', score: 92.3, unit: '%' },
+    { name: 'HumanEval', score: 89.1, unit: '%' },
+    { name: 'GSM8K', score: 96.4, unit: '%' },
+  ],
+  capabilities: ['Code generation', 'Summarization', 'Reasoning'],
+  limitations: ['May hallucinate', 'Limited real-time knowledge'],
+  highlights: [
+    { label: 'Parameters', value: '175B' },
+    { label: 'Context Window', value: '200K tokens' },
+  ],
+  training_data_cutoff: 'April 2025',
+};
+
+const layout = generateLayout(sampleExtracted);
+---
+
+<BaseLayout title="Bento Test">
+  <main class="p-8">
+    <BentoGrid layout={layout} client:load />
+  </main>
+</BaseLayout>
