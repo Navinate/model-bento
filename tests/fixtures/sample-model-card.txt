@@ -1,0 +1,30 @@
+Claude Sonnet 4 Model Card
+
+Provider: Anthropic
+Model Name: Claude Sonnet 4
+Release Date: 2025-05-22
+
+Overview:
+Claude Sonnet 4 is a large language model developed by Anthropic. It features 175 billion parameters and supports a context window of 200,000 tokens. The model excels at coding, analysis, and creative writing tasks.
+
+Benchmarks:
+- MMLU: 92.3%
+- HumanEval: 89.1%
+- GSM8K: 96.4%
+- HellaSwag: 95.2%
+
+Capabilities:
+- Advanced code generation and debugging
+- Long-document analysis and summarization
+- Creative writing and ideation
+- Multi-step reasoning
+- Instruction following
+
+Limitations:
+- May hallucinate facts in knowledge-intensive domains
+- Limited real-time knowledge (training cutoff applies)
+- Cannot execute code or access the internet
+
+Training:
+- Training data cutoff: April 2025
+- Trained on a diverse corpus of publicly available text

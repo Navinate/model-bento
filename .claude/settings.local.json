@@ -12,7 +12,10 @@
       "Bash(DATABASE_URL=\"postgresql://modelbento:modelbento@localhost:5432/modelbento_test\" bunx drizzle-kit migrate)",
       "Bash(DATABASE_URL=\"postgresql://modelbento:modelbento@localhost:5432/modelbento_test\" bun run test -- tests/db/schema.test.ts)",
       "Bash(npx vitest:*)",
-      "Bash(node -e \"const v = require\\('./node_modules/vitest/package.json'\\); console.log\\(Object.keys\\(v.exports || {}\\).join\\('\\\\n'\\)\\)\")"
+      "Bash(node -e \"const v = require\\('./node_modules/vitest/package.json'\\); console.log\\(Object.keys\\(v.exports || {}\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node scripts/generate-test-fixtures.mjs)",
+      "Bash(node:*)",
+      "Bash(bun remove:*)"
     ]
   }
 }
