@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/global.css';
+import { ModelGrid } from '../components/explore/ModelGrid';
+import { db } from '../lib/db';
+import { models, bentoPages } from '../lib/schema';
+import { eq } from 'drizzle-orm';
+
+const url = new URL(Astro.request.url);
+const initialQuery = url.searchParams.get('q') ?? '';
+
+// Fetch all published models (those with bento pages)
+const results = await db
+  .select({
+    provider: models.provider,
+    name: models.name,
+    displayName: models.displayName,
+  })
+  .from(models)
+  .innerJoin(bentoPages, eq(bentoPages.modelId, models.id))
+  .orderBy(models.displayName);
+---
+
+<BaseLayout title="Explore — Model Bento">
+  <main class="mx-auto max-w-5xl p-8">
+    <h1 class="mb-8 text-3xl font-bold text-slate-900">Explore Models</h1>
+    <ModelGrid models={results} initialQuery={initialQuery} client:load />
+  </main>
+</BaseLayout>
