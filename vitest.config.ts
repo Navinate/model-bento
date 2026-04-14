@@ -4,5 +4,8 @@ import { loadEnv } from 'vite';
 export default defineConfig({
   test: {
     env: loadEnv('test', process.cwd(), ''),
+    environmentMatchGlobs: [
+      ['tests/components/**', 'jsdom'],
+    ],
   },
 });

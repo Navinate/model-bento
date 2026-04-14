@@ -524,10 +524,11 @@ model-bento/
 - [x] **2.3** — Model existence check ✅
 - [x] **2.4** — Generation server action (wiring) ✅
 - [x] **3.1** — Layout engine ✅
-- [ ] **3.2** — Bento card components
-- [ ] **Phase 3.3+** — not started
+- [x] **3.2** — Bento card components ✅
+- [ ] **3.3** — Theming + responsive grid
+- [ ] **Phase 3.4+** — not started
 
-**Current test count: 32 passing**
+**Current test count: 39 passing**
 
 ### Testing Infrastructure
 
