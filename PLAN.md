@@ -529,10 +529,11 @@ model-bento/
 - [x] **3.4** — Animations ✅
 - [x] **4.1** — Publish transaction ✅
 - [x] **4.2** — SSR bento page ✅
-- [ ] **4.3** — Redis data caching
-- [ ] **Phase 4.4+** — not started
+- [x] **4.3** — Redis data caching ✅
+- [ ] **4.4** — Explore page
+- [ ] **Phase 5+** — not started
 
-**Current test count: 53 passing** (43 Vitest + 10 Playwright)
+**Current test count: 56 passing** (46 Vitest + 10 Playwright)
 
 ### Testing Infrastructure
 
