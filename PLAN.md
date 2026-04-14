@@ -526,10 +526,10 @@ model-bento/
 - [x] **3.1** — Layout engine ✅
 - [x] **3.2** — Bento card components ✅
 - [x] **3.3** — Theming + responsive grid ✅
-- [ ] **3.4** — Animations
-- [ ] **Phase 4+** — not started
+- [x] **3.4** — Animations ✅
+- [ ] **Phase 4: Publishing & Viewing** — not started
 
-**Current test count: 43 passing** (39 Vitest + 4 Playwright)
+**Current test count: 45 passing** (39 Vitest + 6 Playwright)
 
 ### Testing Infrastructure
 

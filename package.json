@@ -24,6 +24,7 @@
     "auth-astro": "^4.2.0",
     "drizzle-orm": "^0.45.2",
     "ioredis": "^5.10.1",
+    "motion": "^12.38.0",
     "pdf-parse": "1.1.1",
     "postgres": "^3.4.9",
     "react": "^19.1.0",

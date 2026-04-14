@@ -13,6 +13,12 @@
   gap: var(--bento-gap);
 }
 
+/* Cards start hidden, animated in by JS via inView */
+.bento-grid [data-card] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 @media (max-width: 768px) {
   .bento-grid {
     grid-template-columns: 1fr;

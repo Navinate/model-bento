@@ -1,5 +1,15 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeAll } from 'vitest';
 import { render, cleanup, within } from '@testing-library/react';
+
+// Mock IntersectionObserver for jsdom (used by motion's inView)
+beforeAll(() => {
+  global.IntersectionObserver = class IntersectionObserver {
+    constructor(private callback: IntersectionObserverCallback) {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as any;
+});
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { BentoGrid } from '../../src/components/bento/BentoGrid';

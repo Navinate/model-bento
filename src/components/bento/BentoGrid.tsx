@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { animate, inView } from 'motion';
 import type { LayoutCard } from '../../lib/layout-engine';
 import { HeroCard } from './HeroCard';
 import { StatCard } from './StatCard';
@@ -24,10 +26,31 @@ const cardComponents: Record<LayoutCard['type'], React.ComponentType<{ data: any
 };
 
 export function BentoGrid({ layout }: BentoGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!gridRef.current) return;
+
+    const cards = gridRef.current.querySelectorAll<HTMLElement>('[data-card]');
+    // Initial opacity is set via CSS (.bento-grid [data-card] { opacity: 0 })
+
+    const cleanups: Array<() => void> = [];
+    cards.forEach((card, i) => {
+      const cleanup = inView(card, () => {
+        animate(card, { opacity: [0, 1], transform: ['translateY(20px)', 'translateY(0px)'] }, {
+          duration: 0.5,
+          delay: i * 0.08,
+          easing: 'ease-out',
+        });
+      }, { amount: 0.2 });
+      cleanups.push(cleanup);
+    });
+
+    return () => cleanups.forEach((fn) => fn());
+  }, [layout]);
+
   return (
-    <div
-      className="bento-grid"
-    >
+    <div className="bento-grid" ref={gridRef}>
       {layout.map((card, i) => {
         const Component = cardComponents[card.type];
         return (
