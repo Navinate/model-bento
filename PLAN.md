@@ -535,9 +535,11 @@ model-bento/
 - [x] **5.2** — OG image generation ✅
 - [x] **5.3** — JSON-LD structured data ✅
 - [x] **5.4** — Sitemap ✅
-- [ ] **Phase 6: Admin** — not started
+- [x] **6.1** — Admin middleware ✅
+- [ ] **6.2** — Admin dashboard + model list
+- [ ] **Phase 6.3+** — not started
 
-**Current test count: 70 passing** (49 Vitest + 21 Playwright)
+**Current test count: 75 passing** (54 Vitest + 21 Playwright)
 
 ### Testing Infrastructure
 
