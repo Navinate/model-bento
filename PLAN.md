@@ -531,9 +531,11 @@ model-bento/
 - [x] **4.2** — SSR bento page ✅
 - [x] **4.3** — Redis data caching ✅
 - [x] **4.4** — Explore page ✅
-- [ ] **Phase 5: SEO & Sharing** — not started
+- [x] **5.1** — OG meta tags ✅
+- [ ] **5.2** — OG image generation
+- [ ] **Phase 5.3+** — not started
 
-**Current test count: 59 passing** (46 Vitest + 13 Playwright)
+**Current test count: 64 passing** (46 Vitest + 18 Playwright)
 
 ### Testing Infrastructure
 

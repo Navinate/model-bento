@@ -1,9 +1,9 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import OGMeta from '../../../components/shared/OGMeta.astro';
 import '../../../styles/global.css';
 import { BentoGrid } from '../../../components/bento/BentoGrid';
 import { getBentoData } from '../../../lib/services/bento-cache';
-import type { LayoutCard } from '../../../lib/layout-engine';
 
 const { provider, model } = Astro.params;
 
@@ -17,11 +17,21 @@ if (!data) {
   return new Response(null, { status: 404 });
 }
 
+const siteUrl = import.meta.env.PUBLIC_SITE_URL ?? 'https://modelbento.com';
+const canonicalUrl = `${siteUrl}/m/${provider}/${model}`;
+const description = data.extracted.description ?? `${data.displayName} model card — benchmarks, capabilities, and highlights.`;
+
 // Immutable content — cache aggressively
 Astro.response.headers.set('Cache-Control', 'public, max-age=86400, immutable');
 ---
 
-<BaseLayout title={`${data.displayName} — Model Bento`}>
+<BaseLayout title={`${data.displayName} — Model Bento`} description={description}>
+  <OGMeta
+    slot="head"
+    title={data.displayName}
+    description={description}
+    canonicalUrl={canonicalUrl}
+  />
   <main class="mx-auto max-w-7xl p-8">
     <BentoGrid layout={data.layout} client:load />
   </main>
