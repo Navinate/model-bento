@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/global.css';
-import { getSession, requireAuth } from '../lib/auth';
+import { getSession } from 'auth-astro/server';
+import { requireAuth } from '../lib/auth';
 import { db } from '../lib/db';
 import { users } from '../lib/schema';
 import { eq } from 'drizzle-orm';
 
-const session = await (Astro.locals as any).auth?.();
-const auth = requireAuth(getSession(session), '/generate');
+const session = await getSession(Astro.request);
+const auth = requireAuth(session as any, '/generate');
 
 if (auth.redirect) {
   return Astro.redirect(auth.redirect);
