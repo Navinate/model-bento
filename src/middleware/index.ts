@@ -2,6 +2,10 @@ import { defineMiddleware } from 'astro:middleware';
 import { getSession as getAuthSession } from 'auth-astro/server';
 import { getSession } from '../lib/auth';
 import { isAdmin } from '../lib/admin';
+import { startBatchPoller } from '../lib/services/batch-poller';
+
+// Start the background poller once on first request
+startBatchPoller();
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // Only gate /admin routes
