@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/global.css';
+import { getSession } from 'auth-astro/server';
+import { requireAuth } from '../../lib/auth';
+import { db } from '../../lib/db';
+import { generationJobs } from '../../lib/schema';
+import { eq } from 'drizzle-orm';
+import { BentoGrid } from '../../components/bento/BentoGrid';
+import { generateLayout } from '../../lib/layout-engine';
+import { checkModelExists } from '../../lib/services/model-check';
+import { publishModel } from '../../lib/services/publish';
+import type { ExtractedModel } from '../../lib/services/llm-extractor';
+
+const session = await getSession(Astro.request);
+const auth = requireAuth(session as any, '/generate/preview');
+
+if (auth.redirect) {
+  return Astro.redirect(auth.redirect);
+}
+
+const jobId = Astro.url.searchParams.get('job');
+if (!jobId) {
+  return Astro.redirect('/dashboard');
+}
+
+const [job] = await db
+  .select()
+  .from(generationJobs)
+  .where(eq(generationJobs.id, jobId));
+
+if (!job || job.userId !== auth.session!.user.id || job.status !== 'ready') {
+  return Astro.redirect('/dashboard');
+}
+
+const extracted = job.extracted as ExtractedModel;
+const layout = generateLayout(extracted);
+
+const existsCheck = await checkModelExists(extracted.provider, extracted.name);
+
+let publishError = '';
+
+if (Astro.request.method === 'POST' && !existsCheck.exists) {
+  try {
+    await publishModel({
+      extracted,
+      layout,
+      sourceText: job.sourceText,
+      sourceType: job.sourceType as 'text' | 'pdf',
+      userId: auth.session!.user.id,
+    });
+
+    // Clean up the job
+    await db.delete(generationJobs).where(eq(generationJobs.id, jobId));
+
+    return Astro.redirect(`/m/${extracted.provider}/${extracted.name}`);
+  } catch (err) {
+    console.error('Publish error:', err);
+    publishError = 'Failed to publish. The model may already exist.';
+  }
+}
+---
+
+<BaseLayout title={`Preview: ${extracted.display_name} — Model Bento`}>
+  <main class="mx-auto max-w-7xl p-8">
+    <a href="/dashboard" class="text-sm text-slate-500 hover:text-slate-900">&larr; Back to Dashboard</a>
+
+    <div class="mt-4 mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">{extracted.display_name}</h1>
+        <p class="text-sm text-slate-500 mt-1">{extracted.provider}/{extracted.name}</p>
+      </div>
+
+      {existsCheck.exists ? (
+        <div class="rounded-lg bg-yellow-50 px-4 py-2 text-sm text-yellow-700">
+          This model already has a page.
+          <a href={`/m/${extracted.provider}/${extracted.name}`} class="underline ml-1">View it</a>
+        </div>
+      ) : (
+        <form method="POST">
+          {publishError && (
+            <p class="text-sm text-red-600 mb-2">{publishError}</p>
+          )}
+          <button
+            type="submit"
+            class="rounded-xl bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Publish
+          </button>
+        </form>
+      )}
+    </div>
+
+    <BentoGrid layout={layout} client:load />
+  </main>
+</BaseLayout>
