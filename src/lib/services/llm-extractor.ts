@@ -38,7 +38,7 @@ export class ExtractionError extends Error {
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 500;
 
-const EXTRACTION_PROMPT = `You are a structured data extractor for AI model cards. Given the raw text of a model card, extract the following information as JSON.
+export const EXTRACTION_PROMPT = `You are a structured data extractor for AI model cards. Given the raw text of a model card, extract the following information as JSON.
 
 Required fields:
 - provider: lowercase provider name (e.g. "anthropic", "openai", "meta", "google")
