@@ -4,8 +4,8 @@ import '../styles/global.css';
 import { getSession } from 'auth-astro/server';
 import { requireAuth } from '../lib/auth';
 import { db } from '../lib/db';
-import { models, bentoPages } from '../lib/schema';
-import { eq } from 'drizzle-orm';
+import { models, bentoPages, generationJobs } from '../lib/schema';
+import { eq, inArray } from 'drizzle-orm';
 
 const session = await getSession(Astro.request);
 const auth = requireAuth(session as any, '/dashboard');
@@ -13,6 +13,16 @@ const auth = requireAuth(session as any, '/dashboard');
 if (auth.redirect) {
   return Astro.redirect(auth.redirect);
 }
+
+const userId = auth.session!.user.id;
+
+const jobs = await db
+  .select()
+  .from(generationJobs)
+  .where(eq(generationJobs.userId, userId))
+  .orderBy(generationJobs.createdAt);
+
+const activeJobs = jobs.filter((j) => j.status === 'processing' || j.status === 'ready' || j.status === 'failed');
 
 const userModels = await db
   .select({
@@ -22,13 +32,55 @@ const userModels = await db
   })
   .from(models)
   .innerJoin(bentoPages, eq(bentoPages.modelId, models.id))
-  .where(eq(models.createdBy, auth.session!.user.id));
+  .where(eq(models.createdBy, userId));
 ---
 
 <BaseLayout title="Dashboard — Model Bento">
   <main class="mx-auto max-w-5xl p-8">
-    <h1 class="text-3xl font-bold text-slate-900 mb-8">Your Bento Pages</h1>
+    <h1 class="text-3xl font-bold text-slate-900 mb-8">Dashboard</h1>
 
+    {activeJobs.length > 0 && (
+      <div class="mb-8">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4">Pending Extractions</h2>
+        <div class="space-y-3">
+          {activeJobs.map((job) => (
+            <div class="rounded-xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+              {job.status === 'processing' && (
+                <>
+                  <div>
+                    <p class="text-sm font-medium text-slate-900">Extracting model data...</p>
+                    <p class="text-xs text-slate-500 mt-1">Submitted {new Date(job.createdAt!).toLocaleString()}</p>
+                  </div>
+                  <div class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900"></div>
+                </>
+              )}
+              {job.status === 'ready' && (
+                <>
+                  <div>
+                    <p class="text-sm font-medium text-green-700">Ready to preview</p>
+                    <p class="text-xs text-slate-500 mt-1">Extraction complete</p>
+                  </div>
+                  <a
+                    href={`/generate/preview?job=${job.id}`}
+                    class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                  >
+                    Preview
+                  </a>
+                </>
+              )}
+              {job.status === 'failed' && (
+                <div>
+                  <p class="text-sm font-medium text-red-600">Extraction failed</p>
+                  <p class="text-xs text-slate-500 mt-1">{job.error ?? 'Unknown error'}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <h2 class="text-lg font-semibold text-slate-900 mb-4">Your Bento Pages</h2>
     {userModels.length > 0 ? (
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {userModels.map((m) => (
