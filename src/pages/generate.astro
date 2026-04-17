@@ -4,8 +4,13 @@ import '../styles/global.css';
 import { getSession } from 'auth-astro/server';
 import { requireAuth } from '../lib/auth';
 import { db } from '../lib/db';
-import { users } from '../lib/schema';
+import { users, generationJobs } from '../lib/schema';
 import { eq } from 'drizzle-orm';
+import { parsePdf } from '../lib/services/pdf-parser';
+import { submitExtractionBatch } from '../lib/services/batch-submit';
+import { checkRateLimit } from '../lib/services/rate-limit';
+import { createRedisClient } from '../lib/redis';
+import { randomUUID } from 'crypto';
 
 const session = await getSession(Astro.request);
 const auth = requireAuth(session as any, '/generate');
@@ -14,10 +19,64 @@ if (auth.redirect) {
   return Astro.redirect(auth.redirect);
 }
 
-// Check ban status
 const [user] = await db.select().from(users).where(eq(users.id, auth.session!.user.id));
-
 const isBanned = user?.bannedAt != null;
+
+let error = '';
+
+if (Astro.request.method === 'POST' && !isBanned) {
+  try {
+    // Rate limit check
+    const redis = createRedisClient();
+    try {
+      const limit = await checkRateLimit(redis, auth.session!.user.id);
+      if (!limit.allowed) {
+        error = `Rate limit exceeded. Try again in ${Math.ceil((limit.retryAfter ?? 3600) / 60)} minutes.`;
+      }
+    } finally {
+      await redis.quit();
+    }
+
+    if (!error) {
+      const formData = await Astro.request.formData();
+      const pdfFile = formData.get('pdf') as File | null;
+      const textInput = formData.get('text') as string | null;
+
+      let sourceText = '';
+      let sourceType: 'pdf' | 'text' = 'text';
+
+      if (pdfFile && pdfFile.size > 0) {
+        const buffer = Buffer.from(await pdfFile.arrayBuffer());
+        sourceText = await parsePdf(buffer);
+        sourceType = 'pdf';
+      } else if (textInput && textInput.trim()) {
+        sourceText = textInput.trim();
+        sourceType = 'text';
+      }
+
+      if (!sourceText) {
+        error = 'Please upload a PDF or paste model card text.';
+      } else {
+        const jobId = randomUUID();
+        const { batchId } = await submitExtractionBatch(sourceText, jobId);
+
+        await db.insert(generationJobs).values({
+          id: jobId,
+          userId: auth.session!.user.id,
+          batchId,
+          sourceText,
+          sourceType,
+          status: 'processing',
+        });
+
+        return Astro.redirect('/dashboard');
+      }
+    }
+  } catch (err) {
+    console.error('Generate error:', err);
+    error = 'Something went wrong. Please try again.';
+  }
+}
 ---
 
 <BaseLayout title="Generate — Model Bento">
@@ -35,7 +94,14 @@ const isBanned = user?.bannedAt != null;
     ) : (
       <div>
         <h1 class="text-3xl font-bold text-slate-900 mb-8">Generate Bento Page</h1>
-        <p class="text-slate-500 mb-6">Upload a model card PDF or paste the text to generate a bento page.</p>
+        <p class="text-slate-500 mb-6">Upload a model card PDF or paste the text. Extraction runs in the background — check your dashboard for results.</p>
+
+        {error && (
+          <div class="mb-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Upload PDF</label>
