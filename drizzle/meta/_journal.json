@@ -8,6 +8,13 @@
       "when": 1776125632941,
       "tag": "0000_thin_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776400723169,
+      "tag": "0001_bizarre_mysterio",
+      "breakpoints": true
     }
   ]
 }

@@ -39,3 +39,15 @@ export const sourceTexts = pgTable('source_texts', {
   content: text('content').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
+
+export const generationJobs = pgTable('generation_jobs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  batchId: text('batch_id').notNull(),
+  sourceText: text('source_text').notNull(),
+  sourceType: text('source_type').notNull().default('text'),
+  status: text('status').notNull().default('processing'),
+  extracted: jsonb('extracted'),
+  error: text('error'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
