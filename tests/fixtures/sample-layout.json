@@ -29,8 +29,8 @@
   },
   {
     "type": "benchmark",
-    "gridColumn": "5 / span 2",
-    "gridRow": "1 / span 1",
+    "gridColumn": "3 / span 2",
+    "gridRow": "2 / span 1",
     "data": {
       "name": "GSM8K",
       "score": 96.4,
@@ -39,8 +39,8 @@
   },
   {
     "type": "benchmark",
-    "gridColumn": "7 / span 2",
-    "gridRow": "1 / span 1",
+    "gridColumn": "1 / span 2",
+    "gridRow": "3 / span 1",
     "data": {
       "name": "HellaSwag",
       "score": 95.2,
@@ -49,8 +49,8 @@
   },
   {
     "type": "benchmark",
-    "gridColumn": "9 / span 2",
-    "gridRow": "1 / span 1",
+    "gridColumn": "3 / span 2",
+    "gridRow": "3 / span 1",
     "data": {
       "name": "MMLU",
       "score": 92.3,
@@ -59,8 +59,8 @@
   },
   {
     "type": "benchmark",
-    "gridColumn": "11 / span 2",
-    "gridRow": "1 / span 1",
+    "gridColumn": "1 / span 2",
+    "gridRow": "4 / span 1",
     "data": {
       "name": "HumanEval",
       "score": 89.1,
@@ -70,7 +70,7 @@
   {
     "type": "capabilities",
     "gridColumn": "3 / span 2",
-    "gridRow": "2 / span 1",
+    "gridRow": "4 / span 1",
     "data": {
       "capabilities": [
         "Advanced code generation and debugging",
@@ -83,8 +83,8 @@
   },
   {
     "type": "limitations",
-    "gridColumn": "5 / span 2",
-    "gridRow": "2 / span 1",
+    "gridColumn": "1 / span 2",
+    "gridRow": "5 / span 1",
     "data": {
       "limitations": [
         "May hallucinate facts in knowledge-intensive domains",
@@ -95,8 +95,8 @@
   },
   {
     "type": "highlight",
-    "gridColumn": "7 / span 1",
-    "gridRow": "2 / span 1",
+    "gridColumn": "3 / span 1",
+    "gridRow": "5 / span 1",
     "data": {
       "label": "Parameters",
       "value": "175B"
@@ -104,8 +104,8 @@
   },
   {
     "type": "highlight",
-    "gridColumn": "8 / span 1",
-    "gridRow": "2 / span 1",
+    "gridColumn": "4 / span 1",
+    "gridRow": "5 / span 1",
     "data": {
       "label": "Context Window",
       "value": "200K tokens"
@@ -113,8 +113,8 @@
   },
   {
     "type": "highlight",
-    "gridColumn": "9 / span 1",
-    "gridRow": "2 / span 1",
+    "gridColumn": "1 / span 1",
+    "gridRow": "6 / span 1",
     "data": {
       "label": "GSM8K",
       "value": "96.4%"
@@ -122,8 +122,8 @@
   },
   {
     "type": "training",
-    "gridColumn": "10 / span 2",
-    "gridRow": "2 / span 1",
+    "gridColumn": "2 / span 2",
+    "gridRow": "6 / span 1",
     "data": {
       "trainingDataCutoff": "April 2025"
     }

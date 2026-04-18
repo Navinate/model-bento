@@ -17,9 +17,14 @@ const { title, description = 'AI model cards as Apple-style bento presentations'
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.bunny.net/css?family=fraunces:400,500,600,700,800,900|geist:400,500,600,700|geist-mono:400,500&display=swap"
+    />
     <slot name="head" />
   </head>
-  <body class="min-h-screen bg-white text-neutral-900 antialiased">
+  <body class="min-h-screen antialiased">
     <slot />
   </body>
 </html>

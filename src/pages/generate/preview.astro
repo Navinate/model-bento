@@ -50,7 +50,6 @@ if (Astro.request.method === 'POST' && !existsCheck.exists) {
       userId: auth.session!.user.id,
     });
 
-    // Clean up the job
     await db.delete(generationJobs).where(eq(generationJobs.id, jobId));
 
     return Astro.redirect(`/m/${extracted.provider}/${extracted.name}`);
@@ -62,30 +61,45 @@ if (Astro.request.method === 'POST' && !existsCheck.exists) {
 ---
 
 <BaseLayout title={`Preview: ${extracted.display_name} — Model Bento`}>
-  <main class="mx-auto max-w-7xl p-8">
-    <a href="/dashboard" class="text-sm text-slate-500 hover:text-slate-900">&larr; Back to Dashboard</a>
+  <main class="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+    <a
+      href="/dashboard"
+      class="font-mono inline-flex items-center gap-1.5 text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-soft)] transition-colors hover:text-[color:var(--ink)]"
+    >
+      <span aria-hidden>←</span> Back to dashboard
+    </a>
 
-    <div class="mt-4 mb-8 flex items-center justify-between">
+    <div class="mt-6 mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">{extracted.display_name}</h1>
-        <p class="text-sm text-slate-500 mt-1">{extracted.provider}/{extracted.name}</p>
+        <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-soft)]">
+          Preview · ready to publish
+        </p>
+        <h1 class="font-display mt-2 text-[clamp(2.25rem,4vw,3.5rem)] font-semibold leading-[1] text-[color:var(--ink)]">
+          <span class="italic">{extracted.display_name}</span>
+        </h1>
+        <p class="font-mono mt-2 text-[0.8rem] text-[color:var(--ink-faint)]">
+          {extracted.provider}/{extracted.name}
+        </p>
       </div>
 
       {existsCheck.exists ? (
-        <div class="rounded-lg bg-yellow-50 px-4 py-2 text-sm text-yellow-700">
+        <div class="rounded-2xl border border-[color:var(--c-butter-deep)] bg-[color:var(--c-butter)] px-4 py-3 text-sm text-[color:var(--ink)]">
           This model already has a page.
-          <a href={`/m/${extracted.provider}/${extracted.name}`} class="underline ml-1">View it</a>
+          <a href={`/m/${extracted.provider}/${extracted.name}`} class="ml-1 font-medium underline">View it →</a>
         </div>
       ) : (
-        <form method="POST">
+        <form method="POST" class="flex flex-col items-end gap-2">
           {publishError && (
-            <p class="text-sm text-red-600 mb-2">{publishError}</p>
+            <p class="text-sm text-red-700">{publishError}</p>
           )}
           <button
             type="submit"
-            class="rounded-xl bg-slate-900 px-6 py-3 text-sm font-medium text-white hover:bg-slate-800"
+            class="group relative inline-flex items-center gap-2 rounded-full bg-[color:var(--ink)] px-7 py-3.5 text-sm font-medium text-[color:var(--bg-cream-soft)] shadow-[0_4px_0_rgba(0,0,0,0.08),0_12px_24px_-8px_rgba(0,0,0,0.25)] transition-all hover:-translate-y-0.5 hover:rotate-[-0.5deg] hover:shadow-[0_6px_0_rgba(0,0,0,0.08),0_16px_30px_-8px_rgba(0,0,0,0.3)] active:translate-y-0"
           >
-            Publish
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="opacity-90">
+              <path d="M12 1l1.8 8.2L22 11l-8.2 1.8L12 21l-1.8-8.2L2 11l8.2-1.8z" />
+            </svg>
+            Publish to the world
           </button>
         </form>
       )}

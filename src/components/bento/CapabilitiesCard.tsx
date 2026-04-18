@@ -1,16 +1,28 @@
 interface CapabilitiesCardProps {
   data: { capabilities: string[] };
+  index?: number;
 }
+
+const ROTATIONS = ['-2.5deg', '1.5deg', '-1deg', '2deg', '-1.5deg', '0.5deg', '-0.75deg', '1.75deg'];
 
 export function CapabilitiesCard({ data }: CapabilitiesCardProps) {
   return (
-    <div className="col-span-2 row-span-1 rounded-3xl bg-white p-6" data-card>
-      <p className="text-sm font-medium text-slate-500 mb-3">Capabilities</p>
-      <div className="flex flex-wrap gap-2">
-        {data.capabilities.map((cap) => (
+    <div className="bento-card card-butter col-span-2 row-span-1" data-card>
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-[color:var(--ink-soft)]">
+          Can do
+        </span>
+        <span className="font-mono text-[0.65rem] text-[color:var(--ink-faint)]">
+          {data.capabilities.length}
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2 content-start">
+        {data.capabilities.map((cap, i) => (
           <span
             key={cap}
-            className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700"
+            className={`chip chip-tint-${i % 6}`}
+            style={{ transform: `rotate(${ROTATIONS[i % ROTATIONS.length]})` }}
           >
             {cap}
           </span>
