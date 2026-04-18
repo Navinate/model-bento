@@ -14,7 +14,7 @@ interface BentoGridProps {
   layout: LayoutCard[];
 }
 
-const cardComponents: Record<LayoutCard['type'], React.ComponentType<{ data: any }>> = {
+const cardComponents: Record<LayoutCard['type'], React.ComponentType<{ data: any; index: number }>> = {
   hero: HeroCard,
   stat: StatCard,
   benchmark: BenchmarkCard,
@@ -32,17 +32,29 @@ export function BentoGrid({ layout }: BentoGridProps) {
     if (!gridRef.current) return;
 
     const cards = gridRef.current.querySelectorAll<HTMLElement>('[data-card]');
-    // Initial opacity is set via CSS (.bento-grid [data-card] { opacity: 0 })
-
     const cleanups: Array<() => void> = [];
+
     cards.forEach((card, i) => {
-      const cleanup = inView(card, () => {
-        animate(card, { opacity: [0, 1], transform: ['translateY(20px)', 'translateY(0px)'] }, {
-          duration: 0.5,
-          delay: i * 0.08,
-          easing: 'ease-out',
-        });
-      }, { amount: 0.2 });
+      const cleanup = inView(
+        card,
+        () => {
+          animate(
+            card,
+            { opacity: [0, 1], transform: ['translateY(24px) scale(0.97)', 'translateY(0) scale(1)'] },
+            { duration: 0.7, delay: i * 0.06, easing: [0.22, 1, 0.36, 1] },
+          );
+          // Animate any benchmark bar fills inside this card
+          const bars = card.querySelectorAll<HTMLElement>('[data-score-bar]');
+          bars.forEach((bar) => {
+            const target = bar.style.width;
+            bar.style.width = '0%';
+            requestAnimationFrame(() => {
+              bar.style.width = target;
+            });
+          });
+        },
+        { amount: 0.2 },
+      );
       cleanups.push(cleanup);
     });
 
@@ -56,12 +68,10 @@ export function BentoGrid({ layout }: BentoGridProps) {
         return (
           <div
             key={i}
-            style={{
-              gridColumn: card.gridColumn,
-              gridRow: card.gridRow,
-            }}
+            className="bento-grid-cell"
+            style={{ gridColumn: card.gridColumn, gridRow: card.gridRow }}
           >
-            <Component data={card.data} />
+            <Component data={card.data} index={i} />
           </div>
         );
       })}

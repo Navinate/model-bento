@@ -7,7 +7,7 @@ export interface LayoutCard {
   data: Record<string, unknown>;
 }
 
-const GRID_COLS = 12;
+const GRID_COLS = 4;
 const HIGH_SCORE_THRESHOLD = 70;
 
 /**

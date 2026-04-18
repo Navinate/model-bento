@@ -4,24 +4,41 @@ import '../../styles/global.css';
 import { BentoGrid } from '../../components/bento/BentoGrid';
 import { generateLayout } from '../../lib/layout-engine';
 
-// Sample extracted data for testing
+// Sample extracted data for testing — richer payload to exercise all card types
 const sampleExtracted = {
-  provider: 'anthropic',
-  name: 'claude-sonnet-4',
-  display_name: 'Claude Sonnet 4',
-  description: 'A large language model developed by Anthropic.',
-  parameter_count: '175B',
-  context_window: 200000,
+  provider: 'google',
+  name: 'gemini-3-1-flash-audio',
+  display_name: 'Gemini 3.1 Flash Audio',
+  description: 'A multimodal model with native audio generation, voice interaction, and low-latency conversational AI built on the Flash architecture.',
+  parameter_count: '70B',
+  context_window: 128000,
   benchmarks: [
-    { name: 'MMLU', score: 92.3, unit: '%' },
-    { name: 'HumanEval', score: 89.1, unit: '%' },
-    { name: 'GSM8K', score: 96.4, unit: '%' },
+    { name: 'MMLU', score: 92, unit: '%' },
+    { name: 'HumanEval', score: 88, unit: '%' },
+    { name: 'GSM8K', score: 96, unit: '%' },
+    { name: 'MATH', score: 71, unit: '%' },
   ],
-  capabilities: ['Code generation', 'Summarization', 'Reasoning'],
-  limitations: ['May hallucinate', 'Limited real-time knowledge'],
+  capabilities: [
+    'Audio processing and generation',
+    'Real-time voice interactions',
+    'Text-to-speech synthesis',
+    'Image processing',
+    'Video processing',
+    'Text processing',
+    'Low-latency conversational AI',
+    'Multimodal reasoning',
+  ],
+  limitations: [
+    'Subject to safety policies preventing harmful content generation',
+    'Cannot provide medical advice contrary to scientific consensus',
+    'Limited by training data cutoff',
+    'May generate inappropriate content in certain contexts',
+  ],
   highlights: [
-    { label: 'Parameters', value: '175B' },
-    { label: 'Context Window', value: '200K tokens' },
+    { label: 'Context Window (Flash Live)', value: '128K tokens' },
+    { label: 'Output Capacity (Flash Live)', value: '64K tokens' },
+    { label: 'Text Input Limit (Flash TTS)', value: '16K tokens' },
+    { label: 'Audio Output (Flash TTS)', value: '32K tokens' },
   ],
   training_data_cutoff: 'April 2025',
 };
@@ -30,9 +47,17 @@ const layout = generateLayout(sampleExtracted);
 ---
 
 <BaseLayout title="Bento Test">
-  <main class="p-8">
-    <div id="spacer" style="height: 100vh; display: flex; align-items: center; justify-content: center;">
-      <h1 class="text-4xl font-bold">Scroll down for bento grid</h1>
+  <main class="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+    <div class="mb-10">
+      <p class="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[color:var(--ink-soft)]">
+        Preview · ready to publish
+      </p>
+      <h1 class="font-display mt-2 text-[clamp(2.25rem,4vw,3.5rem)] font-semibold leading-[1] text-[color:var(--ink)]">
+        <span class="italic">{sampleExtracted.display_name}</span>
+      </h1>
+      <p class="font-mono mt-2 text-[0.8rem] text-[color:var(--ink-faint)]">
+        {sampleExtracted.provider}/{sampleExtracted.name}
+      </p>
     </div>
     <BentoGrid layout={layout} client:load />
   </main>

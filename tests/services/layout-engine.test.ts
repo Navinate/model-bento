@@ -93,13 +93,13 @@ describe('layout-engine', () => {
 
     const layout = generateLayout(maximal);
 
-    // Verify no cards extend beyond column 12
+    // Verify no cards extend beyond the last grid column
     for (const card of layout) {
       const colMatch = card.gridColumn.match(/(\d+)\s*\/\s*span\s+(\d+)/);
       if (colMatch) {
         const start = parseInt(colMatch[1], 10);
         const span = parseInt(colMatch[2], 10);
-        expect(start + span - 1).toBeLessThanOrEqual(12);
+        expect(start + span - 1).toBeLessThanOrEqual(4);
       }
     }
 
